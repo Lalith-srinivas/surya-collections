@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Surya Collections</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: #fffdfb; color: #333; }
+
+    header {
+      background-color: #f5e6e0;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 { font-size: 2rem; color: #8d5c4b; }
+    .icons { font-size: 1.5rem; }
+    .icons i {
+      margin-left: 1rem;
+      color: #8d5c4b;
+      cursor: pointer;
+      transition: transform 0.3s, color 0.3s;
+    }
+
+    .icons i:hover {
+      transform: scale(1.2);
+      color: #734b3a;
+    }
+
+    .like-panel {
+      position: absolute;
+      top: 100%;
+      right: 2rem;
+      background: white;
+      border: 1px solid #ccc;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      z-index: 10;
+      display: none;
+      padding: 1rem;
+    }
+
+    .like-panel h3 { margin-bottom: 1rem; color: #8d5c4b; font-size: 1.2rem; }
+
+    .like-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.5rem;
+    }
+
+    .like-item img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      margin-right: 10px;
+      border-radius: 5px;
+    }
+
+    .like-item span { flex: 1; font-size: 0.9rem; }
+    .like-item i { cursor: pointer; color: #e74c3c; }
+
+    .hero {
+      background: url('https://images.unsplash.com/photo-1618354691458-cf2dc5a40b8d') center/cover no-repeat;
+      height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-shadow: 1px 1px 5px black;
+    }
+
+    .hero h2 { font-size: 2.5rem; text-align: center; }
+
+    .products {
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .product {
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .product:hover { transform: scale(1.03); }
+
+    .product img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .like-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.2rem;
+      color: #ccc;
+      cursor: pointer;
+      transition: color 0.3s;
+      z-index: 2;
+    }
+
+    .like-icon.liked { color: #e74c3c; }
+
+    .product-details {
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .product-details h3 {
+      font-size: 1.2rem;
+      color: #8d5c4b;
+      margin-bottom: 0.5rem;
+    }
+
+    .product-details p { margin-bottom: 0.5rem; }
+
+    footer {
+      background-color: #f5e6e0;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 2rem;
+      color: #333;
+    }
+
+    /* Popup */
+    .popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100vh;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .popup-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+    }
+
+    .popup-content img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      margin-bottom: 1rem;
+    }
+
+    .popup-content h3 {
+      margin-bottom: 0.5rem;
+      color: #8d5c4b;
+    }
+
+    .popup-content p { margin-bottom: 1rem; }
+
+    .popup-content a button {
+      background-color: #8d5c4b;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    .close-popup {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.2rem;
+      color: #e74c3c;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .hero h2 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Surya Collections</h1>
+    <div class="icons">
+      <i class="fas fa-heart" id="like-header-icon"></i>
+    </div>
+    <div class="like-panel" id="like-panel">
+      <h3>Liked Items</h3>
+      <div id="liked-items"></div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h2>Elegant Jewelry for Every Occasion</h2>
+  </section>
+
+  <section class="products">
+    <div class="product" data-name="Chain with Rings" data-img="product1.jpg" data-price="1200">
+      <img src="product1.jpg" alt="Gold Ring">
+      <i class="fas fa-heart like-icon"></i>
+      <div class="product-details">
+        <h3>Chain with Rings</h3>
+        <p>₹1200</p>
+      </div>
+    </div>
+
+    <div class="product" data-name="Necklace" data-img="product2.jpg" data-price="850">
+      <img src="product2.jpg" alt="Diamond Necklace">
+      <i class="fas fa-heart like-icon"></i>
+      <div class="product-details">
+        <h3>Necklace</h3>
+        <p>₹850</p>
+      </div>
+    </div>
+
+    <div class="product" data-name="Long Chain" data-img="product3.jpg" data-price="1000">
+      <img src="product3.jpg" alt="Pearl Earrings">
+      <i class="fas fa-heart like-icon"></i>
+      <div class="product-details">
+        <h3>Long Chain</h3>
+        <p>₹1000</p>
+      </div>
+    </div>
+
+    <div class="product" data-name="Round Necklace" data-img="product4.jpg" data-price="700">
+      <img src="product4.jpg" alt="Elegant Bracelet">
+      <i class="fas fa-heart like-icon"></i>
+      <div class="product-details">
+        <h3>Round Necklace</h3>
+        <p>₹700</p>
+      </div>
+    </div>
+    <div class="product" data-name="Round Necklace" data-img="product5.jpg" data-price="700">
+        <img src="product5.jpg" alt="Gemstone Pendant">
+        <i class="fas fa-heart like-icon"></i>
+        <div class="product-details">
+          <h3>Round Necklace</h3>
+          <p>₹700</p>
+        </div>
+      </div>
+  
+      <div class="product" data-name="Round Necklace" data-img="product6.jpg" data-price="700">
+        <img src="product6.jpg" alt="Silver Anklet">
+        <i class="fas fa-heart like-icon"></i>
+        <div class="product-details">
+          <h3>Round Necklace</h3>
+          <p>₹700</p>
+        </div>
+      </div>
+  
+      <div class="product" data-name="Lakshmi Chain" data-img="product7.jpg" data-price="1400">
+        <img src="product7.jpg" alt="Ruby Crown">
+        <i class="fas fa-heart like-icon"></i>
+        <div class="product-details">
+          <h3>Lakshmi Chain</h3>
+          <p>₹1400</p>
+        </div>
+      </div>
+  
+      <div class="product" data-name="Long Lakshmi Chain" data-img="product8.jpg" data-price="900">
+        <img src="product8.jpg" alt="Sapphire Studs">
+        <i class="fas fa-heart like-icon"></i>
+        <div class="product-details">
+          <h3>Long Lakshmi Chain</h3>
+          <p>₹900</p>
+        </div>
+      </div>
+
+    </section>
+  
+    <!-- Product Popup -->
+    <div class="popup" id="popup">
+      <div class="popup-content" id="popup-content">
+        <i class="fas fa-times close-popup" id="close-popup"></i>
+        <img src="" alt="Preview" id="popup-img">
+        <h3 id="popup-title"></h3>
+        <p id="popup-price"></p>
+        <a id="popup-link" href="#"><button>Buy Now</button></a>
+      </div>
+    </div>
+  
+    <footer>
+      &copy; 2025 Surya Collections. All rights reserved.
+    </footer>
+  
+    <script>
+      const likeIcon = document.getElementById('like-header-icon');
+      const likePanel = document.getElementById('like-panel');
+      const likedItemsContainer = document.getElementById('liked-items');
+      const likedItems = [];
+  
+      document.querySelectorAll('.like-icon').forEach(icon => {
+        icon.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const product = icon.closest('.product');
+          const name = product.dataset.name;
+          const img = product.dataset.img;
+  
+          icon.classList.toggle('liked');
+          const exists = likedItems.find(item => item.name === name);
+  
+          if (icon.classList.contains('liked')) {
+            if (!exists) likedItems.push({ name, img });
+          } else {
+            const index = likedItems.findIndex(item => item.name === name);
+            if (index > -1) likedItems.splice(index, 1);
+          }
+  
+          updateLikedPanel();
+        });
+      });
+  
+      likeIcon.addEventListener('click', () => {
+        likePanel.style.display = likePanel.style.display === 'block' ? 'none' : 'block';
+      });
+  
+      document.addEventListener('click', (e) => {
+        if (!likePanel.contains(e.target) && !likeIcon.contains(e.target)) {
+          likePanel.style.display = 'none';
+        }
+      });
+  
+      function updateLikedPanel() {
+        likedItemsContainer.innerHTML = '';
+        likedItems.forEach((item, index) => {
+          const div = document.createElement('div');
+          div.className = 'like-item';
+          div.innerHTML = `
+            <img src="${item.img}" alt="${item.name}">
+            <span>${item.name}</span>
+            <i class="fas fa-times" data-index="${index}"></i>
+          `;
+          div.querySelector('i').onclick = () => {
+            likedItems.splice(index, 1);
+            document.querySelectorAll('.product').forEach(p => {
+              if (p.dataset.name === item.name) {
+                p.querySelector('.like-icon').classList.remove('liked');
+              }
+            });
+            updateLikedPanel();
+          };
+          likedItemsContainer.appendChild(div);
+        });
+      }
+  
+      // Popup logic
+      const popup = document.getElementById('popup');
+      const popupImg = document.getElementById('popup-img');
+      const popupTitle = document.getElementById('popup-title');
+      const popupPrice = document.getElementById('popup-price');
+      const popupLink = document.getElementById('popup-link');
+      const closePopup = document.getElementById('close-popup');
+  
+      document.querySelectorAll('.product').forEach(product => {
+        product.addEventListener('click', () => {
+          const name = product.dataset.name;
+          const img = product.dataset.img;
+          const price = product.dataset.price;
+  
+          popupImg.src = img;
+          popupTitle.textContent = name;
+          popupPrice.textContent = `₹${price}`;
+          popupLink.href = `order.html?product=${encodeURIComponent(name)}`;
+  
+          popup.style.display = 'flex';
+        });
+      });
+  
+      closePopup.addEventListener('click', () => {
+        popup.style.display = 'none';
+      });
+    </script>
+  
+  </body>
+  </html>
+  
